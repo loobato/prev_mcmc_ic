@@ -6,7 +6,6 @@ import warnings
 from mydefs import excelzar
 
 warnings.filterwarnings('once')
-pd.set_option('display.max_columns', None)
 
 #%% Dados - 2013 a 2019
 path = 'dds-drive.xlsx'
