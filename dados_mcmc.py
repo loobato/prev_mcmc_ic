@@ -152,6 +152,9 @@ def sep_microreg_data(df):
 
 def eventos_unicos(df):
     # Função para separar por microreg e data os eventos sem duplicatas
+
+    if df.index.__class__.__name__ != 'MultiIndex':
+        df = sep_microreg_data(df)
     
     df = df.Evento
     DIS = {'Evento':list()}
@@ -170,9 +173,7 @@ def upsidedown_dis(dis):
     dis_invertido = {valor: chave for chave, valor in dis.items()}
     return dis_invertido
 
-
 #%% Variavel de Precos
-
 precos = pd.read_excel(path2, 'ARP')
 precos = precos.drop(index=[0, 2], columns=['FORNECEDOR', 'DESCRIÇÃO', 'POSIÇÃO DE ESTOQUE', 'SGPe', 'STATUS'])
 precos = precos.iloc[:29].dropna().reset_index(drop=True)
@@ -180,10 +181,8 @@ precos = precos.set_index(['ITENS'])['VALOR UNITÁRIO']
 precos['Outros'] = 156.209
 
 #%% Concatenando e deixando tudo bonitin
-
 dados_drive = pd.concat([dados_drive1, dados_drive2])
 dados_drive = dados_drive.sort_values(by='Data', axis=0).reset_index(drop=True)
 dados_drive.Item.replace(replace_itens(), inplace=True)
 
-#%% Save
-
+# %%

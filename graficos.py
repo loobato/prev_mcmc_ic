@@ -4,13 +4,15 @@ import pandas as pd
 import numpy as np
 
 class Grafico():
-    def __init__(self) -> None:
+    def __init__(self, real: list, previsao: list) -> None:
         self.path = r"C:\Users\henri\OneDrive\Desktop\Cousas da Facu\Pesquisa\Projeto IC\plots\artigo"
+        self.previsao = previsao
+        self.real = real
         pass
     
-    def evento(self, real, previsao, save=False):
-        vc_prev = previsao.Evento.sort_values()
-        vc_real = real.Evento.reset_index(drop=True).sort_values()
+    def evento(self, save=False):
+        vc_prev = self.previsao[0].Evento.sort_values()
+        vc_real = self.real[1].Evento.reset_index(drop=True).sort_values()
         indices = vc_real.unique()
         indices[0] = 'Chuvas\nIntensas'
         vc_prev = vc_prev.replace(vc_prev.unique(), np.arange(7))
@@ -28,9 +30,9 @@ class Grafico():
         
         return fig
         
-    def microrregiao(self, real, previsao, save=False):
-        gp_real = real.groupby(['Evento', 'Microrregiao']).count().sort_index()
-        gp_prev = previsao.groupby(['Evento', 'Microrregiao']).count().sort_index()
+    def microrregiao(self, save=False):
+        gp_real = self.real[1].reset_index().groupby(['Evento', 'Microrregiao']).count().sort_index()
+        gp_prev = self.previsao[1].groupby(['Evento', 'Microrregiao']).count().sort_index()
 
         serie_real = pd.Series(index=gp_real.index)
         for ev, mc in gp_real.index:
@@ -78,18 +80,19 @@ class Grafico():
         
         return fig
 
-    def solicitacoes(self, real, previsao, save=False):
+    def solicitacoes(self, save=False):
         # gpby real
-        grp_real = real.groupby(['Evento', 'Data']).count()['m']
+        grp_real = self.real[0].groupby(['Evento', 'Data']).count()['m']
         grp_real.index = grp_real.index.droplevel('Data')
-
+        
+        prev = self.previsao[2]
         # gpby prev
         # criar um identificador pra cada evento
-        serie = pd.Series(index=previsao.index)
+        serie = pd.Series(index=prev.index)
         i = 0
         can_ev, can_prob, can_mc = None, None, None
-        for idx in previsao.index:
-            row = previsao.loc[idx]
+        for idx in prev.index:
+            row = prev.loc[idx]
             ev, prob, mc = row['Evento'], row['Probabilidade'], row['Microrregiao']
             if ev == can_ev and prob == can_prob and mc == can_mc: 
                 serie[idx] = i
@@ -97,8 +100,8 @@ class Grafico():
                 i += 1
                 serie[idx] = i
             can_ev, can_prob, can_mc = ev, prob, mc
-        previsao['identificador'] = serie
-        grp_prev = previsao.groupby(['Evento', 'identificador']).count()['Item']
+        prev['identificador'] = serie
+        grp_prev = prev.groupby(['Evento', 'identificador']).count()['Item']
         grp_prev.index = grp_prev.index.droplevel(1)
 
         # criar um grafico onde o x são os eventos e o y é a média de solicitacoes
@@ -126,12 +129,14 @@ class Grafico():
         
         return fig
     
-    def quantidades(self, real, previsao, save=False):
+    def quantidades(self, save=False):
+        prev = self.previsao[3]
+        real = self.real[3]
         # grby real -> já é o real
         # grby prev
-        arrays = [previsao['Evento'], previsao['Item']]
+        arrays = [prev['Evento'], prev['Item']]
         mult = pd.MultiIndex.from_arrays(arrays)
-        grp_prev = previsao.set_index(mult)['Quantidade']
+        grp_prev = prev.set_index(mult)['Quantidade']
         grp_prev = grp_prev.droplevel(0)
 
         serie_real = pd.Series()
@@ -162,9 +167,9 @@ class Grafico():
         
         return fig
 
-    def itens(self, real, previsao, save=False):
-        grp_real = real.groupby(['Evento', 'Item']).count()['Microrregiao']
-        grp_prev = previsao.groupby(['Evento', 'Item']).count()['Microrregiao']
+    def itens(self, save=False):
+        grp_real = self.real[2].groupby(['Evento', 'Item']).count()['Microrregiao']
+        grp_prev = self.previsao[2].groupby(['Evento', 'Item']).count()['Microrregiao']
 
         # formando densidades (series multindex)
         serie_real = pd.Series(index=grp_real.index)

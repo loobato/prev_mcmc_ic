@@ -84,7 +84,6 @@ def prev_itens(dis, solic, ev):
 
 
 def prob_pedidos(dados_crus):
-    from decimal import Decimal
     ''' Função para extrair as distribuições da quantidade de pedidos que cada
         evento faz em um dicionário com valores de series, onde o idx é as qnt de 
         pedidos e os valores da serie são suas probabilidades'''
