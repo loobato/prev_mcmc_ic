@@ -9,6 +9,7 @@ from time import time
 from math import floor
 
 warnings.filterwarnings('ignore')
+#np.random.seed(49)
 
 #%% Distribuição de Probabilidade
 
@@ -184,7 +185,7 @@ def est_quantidades(df_previsao, df_indexado):
         parametros[conj] = (mu, std)
 
     # Parametro de suavização
-    alfa = 0.7
+    alfa = 0.6
 
     for itens in prev['Item']:
         P = False
@@ -200,7 +201,7 @@ def est_quantidades(df_previsao, df_indexado):
             val_normal = norm.ppf(val_uniforme)
 
             # Transformar o valor de volta
-            val_transformado = (val_normal * std + mu)*alfa # como colocar isso no artigo
+            val_transformado = (val_normal * std + mu)*alfa 
 
             if val_transformado < 0:
                 pass

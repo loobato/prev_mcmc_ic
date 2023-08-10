@@ -11,7 +11,12 @@ from dados_mcmc import dados_drive
 from mydefs import excelzar
 from graficos import Grafico
 
-np.random.seed(49)
+#np.random.seed(49)
+
+class Previsao():
+
+    def __init__(self) -> None:
+        pass
 
 # Dados
 dados_indexados = ds.sep_microreg_data(dados_drive)         
@@ -30,49 +35,28 @@ ppd = gt.prob_pedidos(dados_drive)                          # m,std da quantidad
 
 #%%
 
-try:
-    n_testes = int(input('n previsoes:  '))
-except ValueError:
-    n_testes = 1
-
-# Loop de criação
 lis_test = []
 Inicio = time.time()
 Df_Erros = pd.DataFrame(columns=['Evento', 'Microrregiao', 'Itens', 'Solicitacoes', 'Quantidades','Média total'])
-Dis_Previsoes = dict()
 
-for i in range(1, n_testes+1):
-    # loop para realizar varios testes e tirar seus EMAP e entao realizar um teste de hipotese sobre esses erros
+# Previsões
+previsao_eventos = ev.met_hast_sampler(m, v0, 319, tup_sc_evs)                              # Previsão de eventos via mhs
+previsao_microrregiao = ev.aloc_microreg(norm_microreg, previsao_eventos)       # Previsão de microrregiao dada a dist de prob de cada microreg em cada evento
+previsao_solicitacao = gt.solicitacoes(ppd, pri, msm, previsao_microrregiao)    # Pev de solicitações e de itens de acordo com as 
+previsao_quantidades = gt.est_quantidades(previsao_solicitacao, indexado)
+previsao = gt.totais(previsao_quantidades)
 
-    inicio = time.time()
+# Scores
+parametros_previsao = {'evento': sc.score_evento(previsao, tup_sc_evs),
+                    'microrregiao': sc.score_microrregiao(previsao_microrregiao, {y:(x[0], x[1], x[3]) for y, x in norm_microreg.items()}),
+                    'itens': sc.score_itens(previsao_solicitacao, msm),
+                    'solicitacoes': sc.score_solicitacoes(previsao_solicitacao, ppd),
+                    'quantidades': sc.score_quantidades(previsao_quantidades, qnts_msm)}
 
-    # Previsões
-    previsao_eventos = ev.met_hast_sampler(m, v0, 319)                              # Previsão de eventos via mhs
-    previsao_microrregiao = ev.aloc_microreg(norm_microreg, previsao_eventos)       # Previsão de microrregiao dada a dist de prob de cada microreg em cada evento
-    previsao_solicitacao = gt.solicitacoes(ppd, pri, msm, previsao_microrregiao)    # Pev de solicitações e de itens de acordo com as 
-    previsao_quantidades = gt.est_quantidades(previsao_solicitacao, indexado)
-    previsao = gt.totais(previsao_quantidades)
-
-    # Scores
-    parametros_previsao = {'evento': sc.score_evento(previsao, tup_sc_evs),
-                        'microrregiao': sc.score_microrregiao(previsao_microrregiao, {y:(x[0], x[1], x[3]) for y, x in norm_microreg.items()}),
-                        'itens': sc.score_itens(previsao_solicitacao, msm),
-                        'solicitacoes': sc.score_solicitacoes(previsao_solicitacao, ppd),
-                        'quantidades': sc.score_quantidades(previsao_quantidades, qnts_msm)}
-
-    # Erros de cada previsão
-    df_emp = sc.scorador(parametros_previsao)
-    lis_test.append(df_emp['Média total'].values[0])
-    Df_Erros = pd.concat([Df_Erros, df_emp], ignore_index=True)
-
-    # Guardar a previsao
-    Dis_Previsoes[f'Prev. {i}'] = previsao
-
-    fim = time.time()
-
-    print(f'{i}/{n_testes}')
-    print(f'Tempo de exec. da previsão {i}:\t{fim-inicio:.2f}s')
-    print(f'Tempo de exec. até agora:\t{fim-Inicio:.2f}s')
+# Erros de cada previsão
+df_emp = sc.scorador(parametros_previsao)
+lis_test.append(df_emp['Média total'].values[0])
+Df_Erros = pd.concat([Df_Erros, df_emp], ignore_index=True)
 
 Fim = time.time()   
 print(f'Tempo total:\t{Fim-Inicio:.2f}s')
@@ -83,16 +67,16 @@ Df_Erros = Df_Erros / 100               # ajeitando pra colocar em porcentagem n
 dis_erro = Df_Erros.to_dict()
 
 
-print(f'Erro Total: {Df_Erros["Média total"].mean()*100:.2f}%')
+print(f'Erro Total:\t{Df_Erros["Média total"].mean()*100:.2f}%')
 
 # %% Graficos
 
 graf = Grafico()
-graf.evento(dados_unicos, previsao_eventos, save=True)
-graf.microrregiao(dados_unicos.reset_index(),previsao_microrregiao,save=True)
-graf.itens(dados_gastos, previsao_solicitacao, save=True)
-graf.solicitacoes(dados_drive, previsao_solicitacao, save=True)
-graf.quantidades(indexado, previsao_quantidades, save=True)
+graf.evento(dados_unicos, previsao_eventos, save=False)
+graf.microrregiao(dados_unicos.reset_index(),previsao_microrregiao,save=False)
+graf.itens(dados_gastos, previsao_solicitacao, save=False)
+graf.solicitacoes(dados_drive, previsao_solicitacao, save=False)
+graf.quantidades(indexado, previsao_quantidades, save=False)
 
 
 # %%

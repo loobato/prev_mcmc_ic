@@ -11,6 +11,7 @@ from dados_mcmc import dados_drive
 pd.set_option('display.max_columns', None)
 pd.set_option('display.max_rows', None)
 warnings.filterwarnings('ignore')
+#np.random.seed(49)
 
 #%% Frequencias Microrregiao/Evento
 
@@ -122,12 +123,11 @@ def watchousky(df):
 
 #%% Metropolis-Hasting Sampler
 
-def met_hast_sampler(matriz, vet_inicial, dt):
+def met_hast_sampler(matriz, vet_inicial, dt, msm):
     ''' Como descrito no livro 'Statistical Computing in R' '''
     from scipy.stats import norm
     
-    mu, std, map = med_desv_eventos(dados_drive)
-    norm(loc=mu, scale=std)
+    mu, std, map = msm
 
     X = list()
     prob_acc = list()
