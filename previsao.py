@@ -17,30 +17,38 @@ from graficos import Grafico
 
 class Previsao():
 
-    def __init__(self, mat_trans=None, 
-                 vet_inicial=None, 
-                 mu_ev=None, 
-                 std_ev=None, 
+    def __init__(self, fatores=None, 
                  dados=None) -> None:
         
-        self.mat_trans = mat_trans
-        self.vet_inicial = vet_inicial
-        self.mu_ev = mu_ev
-        self.std_ev = std_ev
+        self.fatores = fatores
+        self.map_ev = {0: 'Enxurrada',
+                        1: 'Inundação',
+                        2: 'Chuvas Intensas',
+                        3: 'Vendaval',
+                        4: 'Granizo',
+                        5: 'Estiagem',
+                        6: 'Ciclone'}
         if not dados:
             self.dados = dados_drive
         else:
             self.dados = dados
+
         self.dados_unicos = ds.eventos_unicos(self.dados)
+
         self.pre_run()
         pass
 
     def pre_run(self):
 
-        if not self.mat_trans and not self.vet_inicial and not self.mu_ev and not self.std_ev:
-            self.vet_inicial = ev.vetor_inicial(self.dados_unicos)
-            self.mat_trans = ev.watchousky(self.dados_unicos)
+        self.vet_inicial = ev.vetor_inicial(self.dados_unicos)
+        self.mat_trans = ev.watchousky(self.dados_unicos)
+            
+        if not self.fatores:
             self.mu_ev, self.std_ev, self.map_ev = ev.med_desv_eventos(self.dados)
+        else:
+            serie_fatorada = ev.apl_fator(self.dados, self.fatores)
+            self.mu_ev, self.std_ev, self.map_ev = ev.med_desv_eventos(serie_fatorada)
+        
         self.dados_gastos = self.dados.dropna(axis=0, subset=['Item'])
 
         self.msm_microreg = ev.norms_microreg(self.dados_unicos)
@@ -49,7 +57,7 @@ class Previsao():
         self.msm_solic = gt.prob_pedidos(self.dados)
 
         self.indexado, self.msm_qnts = gt.index_qnt(self.dados_gastos)
-
+        
 
     def run(self):
         self.prev_eventos = ev.met_hast_sampler(self.mat_trans, 

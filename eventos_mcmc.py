@@ -36,7 +36,6 @@ def probs_microreg_evento(atual):
             try:
                 t_microreg.loc[microreg, ev] = t_microreg.loc[microreg, ev]/ t_ev[ev]
             except KeyError:
-
                 pass
 
     return t_microreg.reorder_levels(['Evento', 'Microrregiao'])
@@ -46,7 +45,7 @@ def med_desv_eventos(dados_crus):
     ''' Função que tira a média e o desvio padrão dos eventos da série histórica
         e mapeia eles no dicionário map '''
     df = dados_crus['Evento'].to_frame()
-    
+
     # Criando um mapa de nomes para numeros
     nomes = df.Evento.unique()
     numeros = np.arange(len(nomes))
@@ -264,3 +263,22 @@ def aloc_microreg(norms, prev):
         prev.drop(columns=['Microrregiao'])
 
     return prev
+
+#%% Aplicação dos fatores de multiplicação
+
+def apl_fator(df, fatores):
+    '''Funcao para utilizar os fatores de alteração nas 
+    vizualizações e assim mudar a media e desv dos eventos'''
+    df = df.Evento
+    vc = df.value_counts()
+    lis = []
+    for ev in vc.index:
+        inicial = vc[ev]
+        fatorado = vc[ev]*fatores[ev]
+        final = round(fatorado - inicial)
+        lis.extend([ev] * final)
+
+    df = pd.concat([df, pd.Series(lis)], ignore_index=True).to_frame()
+    df.columns = ['Evento']
+
+    return df
