@@ -144,9 +144,9 @@ class Scorador:
 
         df['Média total'] = df.values.mean()
         
-        mostrador = Shower(df)
-        
-        return mostrador
+        self.mostrador = Shower(df)
+
+        return self.mostrador
 
 #%% Gráficos
 

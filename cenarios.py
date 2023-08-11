@@ -11,6 +11,8 @@ warnings.filterwarnings('ignore')
 cenario1 = Previsao()
 previsao_cenario1 = cenario1.run()
 erros_cenario1 = cenario1.scores.total()
+#%%
+erros_cenario1.obj
 
 #%% Cenario 2 - Probabilidades alteram conforme alteração
 #               de um conjunto de dados pro outro
