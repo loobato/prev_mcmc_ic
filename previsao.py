@@ -56,13 +56,13 @@ class Previsao():
                                                 319, 
                                                 (self.mu_ev, 
                                                  self.std_ev, 
-                                                 self.map_ev))                  # Previsão de eventos via mhs
+                                                 self.map_ev))                  
         self.prev_microrregiao = ev.aloc_microreg(self.msm_microreg,
-                                                   self.prev_eventos)       # Previsão de microrregiao dada a dist de prob de cada microreg em cada evento
+                                                   self.prev_eventos)       
         self.prev_solicitacao = gt.solicitacoes(self.msm_solic, 
                                                 self.pri, 
                                                 self.msm_item, 
-                                                self.prev_microrregiao)    # Pev de solicitações e de itens de acordo com as 
+                                                self.prev_microrregiao)    
         self.prev_quantidades = gt.est_quantidades(self.prev_solicitacao, 
                                                    self.indexado)
         self.previsao = gt.totais(self.prev_quantidades)
