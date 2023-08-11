@@ -7,22 +7,7 @@ import matplotlib.pyplot as plt
 from scipy.stats import norm
 from sklearn.metrics import mean_absolute_percentage_error
 from dados_mcmc import dados_drive, upsidedown_dis
-
-class Shower:
-
-    def __init__(self, to_show) -> None:
-        self.obj = to_show
-        self.tipos()
-        pass
-    
-    def tipos(self):
-        if isinstance(self.obj, pd.DataFrame):
-            self.evento = self.obj.Evento.values[0]
-            self.microrregiao = self.obj.Microrregiao.values[0]
-            self.itens = self.obj.Itens.values[0]
-            self.solicitacoes = self.obj.Solicitacoes.values[0]
-            self.quantidades = self.obj.Quantidades.values[0]
-            self.media = self.obj['Média total'].values[0]
+from shower import Shower
     
 class Scorador:
 
@@ -144,7 +129,7 @@ class Scorador:
 
         df['Média total'] = df.values.mean()
         
-        self.mostrador = Shower(df)
+        self.mostrador = Shower(df, 'erros')
 
         return self.mostrador
 

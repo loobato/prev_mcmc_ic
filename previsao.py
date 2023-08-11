@@ -8,6 +8,7 @@ import gastos_mcmc as gt
 import dados_mcmc as ds
 import scorador as sc
 from scorador import Scorador
+from shower import Shower
 from dados_mcmc import dados_drive
 from mydefs import excelzar
 from graficos import Grafico
@@ -88,5 +89,8 @@ class Previsao():
                                       self.msm_solic,
                                       self.msm_qnts])
 
+        self.rankings = Shower(self.previsao, 'rankings')
+
         return self.previsao
     
+# %%
