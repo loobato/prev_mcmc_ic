@@ -8,28 +8,32 @@ warnings.filterwarnings('ignore')
 
 #%% Cenário 1 - Probabilidades constantes
 
-cenario1 = Previsao()
-previsao_cenario1 = cenario1.run()
-erros_cenario1 = cenario1.scores.total()
-rank_previsao = cenario1.rankings
-
+c1 = Previsao()
+prev_c1 = c1.run()
+erro_c1 = c1.scores.total()
+rank_c1 = c1.rankings
+rank_c1.evento
 #%% Cenario 2 - Probabilidades alteram conforme alteração
 #               de um conjunto de dados pro outro
 
-fator = {'Enxurrada': 01.5,
- 'Inundação': 2.9,
- 'Chuvas Intensas': 1.8,
- 'Vendaval': 2,
- 'Granizo': 3,
- 'Estiagem': 1.5,
- 'Ciclone': 0.1}
+fator = {'Enxurrada': 1,
+ 'Inundação': 1,
+ 'Chuvas Intensas': 1,
+ 'Vendaval': 1,
+ 'Granizo': 1,
+ 'Estiagem': 1,
+ 'Ciclone': 1}
 
-cenario2 = Previsao(fator)
-cenario2.mu_ev, cenario2.std_ev
+c2 = Previsao(fator)
+prev_c2 = c2.run()
+erro_c2 = c2.scores.total()
+rank_c2 = c2.rankings
+rank_c2.evento
 
 #%% Cenario 3 - Probabilidades variam de acordo com
 #               as previsoes do PBMC
 
+c3
 
 #%% Cenario 4 - Probabilidades variam de acordo com estudo
 #               técnico da SEDEC sobre avanço industrial e agropec

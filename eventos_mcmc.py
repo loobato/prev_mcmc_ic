@@ -140,6 +140,7 @@ def met_hast_sampler(matriz, vet_inicial, dt, msm):
 
     # 2. Gerar X0 de g(x)
     x0 = g.rvs()
+    
     while round(x0) not in map.keys():
         x0 = g.rvs()
 
@@ -159,8 +160,6 @@ def met_hast_sampler(matriz, vet_inicial, dt, msm):
         U = np.random.uniform()
 
         bayes = (f[map[round(Y)]]*g.pdf(x)) / (f[map[round(x)]]*g.pdf(Y))
-
-        if bayes == 0: print('ok')
         
         # 3.c Se U <= f(y)g(x|y)/f(xt)g(y|xt) aceitar Y, e Xt+1 = Y
         # se não, Xt+1 = Xt
@@ -173,9 +172,11 @@ def met_hast_sampler(matriz, vet_inicial, dt, msm):
             p_rej = 1-alfa
             prob_acc.append(p_rej)
             pass
-
-        X.append(map[round(x)])
-    
+        
+        if x < 5.999999:
+            X.append(map[round(x)])
+        else:
+            X.append('Ciclone')
     dis = {'Evento': X, 'Probabilidade': prob_acc}
     df = pd.DataFrame(dis)
     
@@ -232,9 +233,10 @@ def norms_microreg(df):
 
     return dis_norm
 
-def aloc_microreg(norms, prev):
+def aloc_microreg(norms, previsao):
     # Gere amostras aleatórias a partir da distribuição normal
     lis_microreg = []
+    prev = previsao.copy()
     for ev in prev.Evento:
         mu = norms[ev][0]
         std = norms[ev][1]
@@ -269,14 +271,14 @@ def aloc_microreg(norms, prev):
 def apl_fator(df, fatores):
     '''Funcao para utilizar os fatores de alteração nas 
     vizualizações e assim mudar a media e desv dos eventos'''
-    df = df.Evento
+    df = df.Evento.copy()
     vc = df.value_counts()
     lis = []
     for ev in vc.index:
-        inicial = vc[ev]
-        fatorado = vc[ev]*fatores[ev]
-        final = round(fatorado - inicial)
-        lis.extend([ev] * final)
+        if fatores[ev] > 0:
+            fatorado = vc[ev]*(1 + fatores[ev])
+            final = abs(round(fatorado))
+            lis.extend([ev] * final)
 
     df = pd.concat([df, pd.Series(lis)], ignore_index=True).to_frame()
     df.columns = ['Evento']

@@ -154,8 +154,11 @@ def eventos_unicos(df):
     # Função para separar por microreg e data os eventos sem duplicatas
 
     if df.index.__class__.__name__ != 'MultiIndex':
-        df = sep_microreg_data(df)
-    
+        try:
+            df = sep_microreg_data(df)
+        except KeyError:
+            pass
+        
     df = df.Evento
     DIS = {'Evento':list()}
     

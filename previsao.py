@@ -21,13 +21,7 @@ class Previsao():
                  dados=None) -> None:
         
         self.fatores = fatores
-        self.map_ev = {0: 'Enxurrada',
-                        1: 'Inundação',
-                        2: 'Chuvas Intensas',
-                        3: 'Vendaval',
-                        4: 'Granizo',
-                        5: 'Estiagem',
-                        6: 'Ciclone'}
+        
         if not dados:
             self.dados = dados_drive
         else:
@@ -40,14 +34,17 @@ class Previsao():
 
     def pre_run(self):
 
-        self.vet_inicial = ev.vetor_inicial(self.dados_unicos)
         self.mat_trans = ev.watchousky(self.dados_unicos)
             
         if not self.fatores:
             self.mu_ev, self.std_ev, self.map_ev = ev.med_desv_eventos(self.dados)
+            self.vet_inicial = ev.vetor_inicial(self.dados_unicos)
         else:
-            serie_fatorada = ev.apl_fator(self.dados, self.fatores)
-            self.mu_ev, self.std_ev, self.map_ev = ev.med_desv_eventos(serie_fatorada)
+            self.serie_fatorada_total = ev.apl_fator(self.dados, self.fatores)
+            self.serie_fatorada_unica = ev.apl_fator(self.dados_unicos, self.fatores)
+            self.mu_ev, self.std_ev, self.map_ev = ev.med_desv_eventos(self.serie_fatorada_total)
+            self.vet_inicial = ev.vetor_inicial(self.serie_fatorada_unica)
+
         
         self.dados_gastos = self.dados.dropna(axis=0, subset=['Item'])
 
@@ -96,6 +93,7 @@ class Previsao():
                                       self.msm_item,
                                       self.msm_solic,
                                       self.msm_qnts])
+        
 
         self.rankings = Shower(self.previsao, 'rankings')
 
