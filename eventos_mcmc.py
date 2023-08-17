@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 from scipy.stats import norm
 from mydefs import excelzar
-from dados_mcmc import dados_drive
+
 
 pd.set_option('display.max_columns', None)
 pd.set_option('display.max_rows', None)
@@ -122,18 +122,20 @@ def watchousky(df):
 
 #%% Metropolis-Hasting Sampler
 
-def met_hast_sampler(matriz, vet_inicial, dt, msm):
+def met_hast_sampler(matriz, vet_inicial, msm):
     ''' Como descrito no livro 'Statistical Computing in R' '''
     from scipy.stats import norm
     
     mu, std, map = msm
+
+    tempo = round(norm(319, 4).rvs())
 
     X = list()
     prob_acc = list()
     
     # 1. Dsitribuição Proposta:
     # A dist proposta é a dist estacionária da cadeia original
-    f = prob_markov(dt, vet_inicial, matriz)
+    f = prob_markov(tempo, vet_inicial, matriz)
 
     # 1.a Distribuição visada
     g = norm(loc=mu, scale=std)
@@ -145,7 +147,7 @@ def met_hast_sampler(matriz, vet_inicial, dt, msm):
         x0 = g.rvs()
 
     # 3. Começar um loop
-    for t in range(0, dt+1):
+    for t in range(0, tempo):
         if t == 0:
             x = x0
         else:
@@ -271,16 +273,24 @@ def aloc_microreg(norms, previsao):
 def apl_fator(df, fatores):
     '''Funcao para utilizar os fatores de alteração nas 
     vizualizações e assim mudar a media e desv dos eventos'''
-    df = df.Evento.copy()
+    df = df.Evento.copy().to_frame()
     vc = df.value_counts()
     lis = []
     for ev in vc.index:
+        ev = ev[0]
         if fatores[ev] > 0:
             fatorado = vc[ev]*(1 + fatores[ev])
-            final = abs(round(fatorado))
+            final = round(fatorado)
             lis.extend([ev] * final)
+        else:
+            fatorado = vc[ev]*(1 + fatores[ev])
+            final = round(vc[ev] - fatorado)
+            df = df.drop(
+                df.loc[df['Evento']==ev].index[:final])
 
-    df = pd.concat([df, pd.Series(lis)], ignore_index=True).to_frame()
+    df = pd.concat([df, pd.Series(lis).to_frame('Evento')], ignore_index=True)
     df.columns = ['Evento']
 
     return df
+
+# %%

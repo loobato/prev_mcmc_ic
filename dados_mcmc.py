@@ -1,6 +1,5 @@
 #%% Dados para os códigos
 
-import numpy as np
 import pandas as pd
 import warnings
 from mydefs import excelzar

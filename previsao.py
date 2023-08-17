@@ -1,12 +1,7 @@
 #%%
-import time
-import numpy as np
-import pandas as pd
-import scipy.stats as stats
 import eventos_mcmc as ev
 import gastos_mcmc as gt
 import dados_mcmc as ds
-import scorador as sc
 from scorador import Scorador
 from shower import Shower
 from dados_mcmc import dados_drive
@@ -59,7 +54,6 @@ class Previsao():
     def run(self):
         self.prev_eventos = ev.met_hast_sampler(self.mat_trans, 
                                                 self.vet_inicial, 
-                                                319, 
                                                 (self.mu_ev, 
                                                  self.std_ev, 
                                                  self.map_ev))                  
