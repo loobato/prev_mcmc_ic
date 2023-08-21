@@ -187,4 +187,14 @@ dados_drive = pd.concat([dados_drive1, dados_drive2])
 dados_drive = dados_drive.sort_values(by='Data', axis=0).reset_index(drop=True)
 dados_drive.Item.replace(replace_itens(), inplace=True)
 
+# %% parametros
+
+total = dados_drive['Valor Total'].sum()
+rank_evs = dados_drive['Evento'].value_counts().head()
+rank_micr = dados_drive.Microrregiao.value_counts().head()
+rank_itens = dados_drive['Item'].value_counts().head()
+rank_evs_din = dados_drive[['Evento', 'Valor Total']].groupby(['Evento']).sum().sort_values(by='Valor Total', ascending=False)
+rank_mc_din = dados_drive[['Microrregiao', 'Valor Total']].groupby(['Microrregiao']).sum().sort_values(by='Valor Total', ascending=False).head()
+
+rank_mc_din
 # %%

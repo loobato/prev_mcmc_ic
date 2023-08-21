@@ -12,6 +12,7 @@ class Shower:
     
     def tipos(self):
         if self.tipo == 'erros':
+            self.obj.index = ['Erros']
             self.evento = self.obj.Evento.values[0]
             self.microrregiao = self.obj.Microrregiao.values[0]
             self.itens = self.obj.Itens.values[0]

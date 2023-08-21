@@ -13,16 +13,19 @@ prev_c1 = c1.run()
 erro_c1 = c1.scores.total()
 rank_c1 = c1.rankings
 rank_c1.evento
-c1.prev_eventos.Evento.value_counts()
+c1.resultados(True, 'prev_c1_final')
 
 #%% Cenario 2 - Probabilidades alteram conforme alteração
 #               de um conjunto de dados pro outro
 
-fator_c2 = {'Enxurrada': 0.1818,
- 'Inundação': 0,
- 'Chuvas Intensas': 0.848485,
- 'Vendaval': 0.631579,
- 'Granizo': 1.135135,
+# fatores dados por:
+#     (qnt_eventounico_dados2 - qnt_eventounico_dados1) / qnt_eventounico_dados1
+
+fator_c2 = {'Enxurrada': -0.9473684210526315,
+ 'Inundação': -0.9523809523809523,
+ 'Chuvas Intensas':-0.2631578947368421,
+ 'Vendaval': -0.5384615384615384,
+ 'Granizo': 0.3125,
  'Estiagem': 0,
  'Ciclone': 0}
 
@@ -31,7 +34,7 @@ prev_c2 = c2.run()
 erro_c2 = c2.scores.total()
 rank_c2 = c2.rankings
 rank_c2.evento
-c2.prev_eventos.Evento.value_counts()
+c2.resultados(True, 'prev_c2_final')
 
 #%% Cenario 3 - Probabilidades variam de acordo com
 #               as previsoes do PBMC
@@ -48,8 +51,21 @@ c3 = Previsao(fator_c3)
 prev_c3 = c3.run()
 rank_c3 = c3.rankings
 rank_c3.evento
-c3.prev_eventos.Evento.value_counts()
+c3.resultados()
 
-#%% Cenario 4 - Probabilidades variam de acordo com estudo
-#               técnico da SEDEC sobre avanço industrial e agropec
+#%%
+cb_c1 = prev_c1[['Item', 'Valor Esperado']].groupby(['Item']).sum().sort_values("Valor Esperado", ascending=False)
+cb_c2 = prev_c2[['Item', 'Valor Esperado']].groupby(['Item']).sum().sort_values("Valor Esperado", ascending=False)
+cb_c3 = prev_c3[['Item', 'Valor Esperado']].groupby(['Item']).sum().sort_values("Valor Esperado", ascending=False)
 
+perc_cb_c1 = cb_c1.loc['Cesta básica 7d']/cb_c1.sum()[0]
+perc_cb_c2 = cb_c2.loc['Cesta básica 7d']/cb_c2.sum()[0]
+perc_cb_c3 = cb_c3.loc['Cesta básica 7d']/cb_c3.sum()[0]
+
+med_cb_esperado = (perc_cb_c1+ perc_cb_c2+ perc_cb_c3)/3
+
+cb_mc_c1 = prev_c1.groupby(['Item', 'Microrregiao']).sum()['Quantidade'].sort_values(ascending=False).loc['Cesta básica 7d']
+cb_mc_c2 = prev_c2.groupby(['Item', 'Microrregiao']).sum()['Quantidade'].sort_values(ascending=False).loc['Cesta básica 7d']
+cb_mc_c3 = prev_c3.groupby(['Item', 'Microrregiao']).sum()['Quantidade'].sort_values(ascending=False).loc['Cesta básica 7d']
+
+cb_mc_c3

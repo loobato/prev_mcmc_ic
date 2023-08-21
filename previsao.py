@@ -1,4 +1,6 @@
 #%%
+import numpy as np
+import pandas as pd
 import eventos_mcmc as ev
 import gastos_mcmc as gt
 import dados_mcmc as ds
@@ -88,9 +90,50 @@ class Previsao():
                                       self.msm_solic,
                                       self.msm_qnts])
         
-
         self.rankings = Shower(self.previsao, 'rankings')
 
         return self.previsao
     
+    def resultados(self, save=False, nome=None):
+        
+        fat = pd.DataFrame(self.fatores, index=[0])
+        vi = self.vet_inicial.to_frame().transpose()
+        solic = self.previsao.Evento.value_counts().to_frame().transpose()
+        qntev = self.prev_eventos.Evento.value_counts().to_frame().transpose()
+        self.tabela =  pd.concat([fat, vi, qntev, solic])
+        self.tabela.index = ['Fatores', 'Freq. i', 'Qnt.', 'Solic.']
+        self.tabela = self.tabela.fillna(0)
+        
+        self.top = pd.DataFrame(columns=['Eventos', 'Microrregioes', 'Itens'])
+        self.top['Eventos'] = self.rankings.evento.index[:5]
+        self.top['Itens'] = self.rankings.itens.index[:5]
+        self.top['Microrregioes'] = self.rankings.microrregiao.index[:5]
+        self.top.index.name = 'Ranking'
+        self.top.index = list(range(1, 6))
+        self.totais = pd.Series({"Eventos":qntev.transpose().sum()[0],
+                                "Solicitacoes":len(self.previsao),
+                                "Valor total":self.previsao["Valor Total"].sum(),
+                                "Valor esperado":self.previsao["Valor Esperado"].sum()})
+        
+        self.gst_ev = self.previsao[['Evento', 'Valor Total']].groupby(['Evento']).sum().sort_values(by='Valor Total', ascending=False)
+        self.gst_mc = self.previsao[['Microrregiao', 'Valor Total']].groupby(['Microrregiao']).sum().sort_values(by='Valor Total', ascending=False).head()
+        
+        print(self.tabela.transpose(), end='\n\n')
+        print(self.scores.total().obj.transpose(), end='\n\n')
+        print(self.totais, end='\n\n')
+        print(self.top)
+
+        if save:
+            excelzar({"previsao":self.previsao,
+                      "overview":self.tabela,
+                      "totais":self.totais,
+                      "erros":self.scores.total().obj.transpose(),
+                      "ranking":self.top}, nome)
+            
+    def save(self, nome):
+        excelzar({"previsao":self.previsao,
+                  "overview":self.tabela,
+                  "totais":self.totais,
+                  "erros":self.scores.total().obj.transpose(),
+                  "ranking":self.top}, nome)
 # %%
