@@ -25,7 +25,7 @@ class Shower:
             self.evento = self.obj.Evento.value_counts().to_frame(n)
             self.microrregiao = self.obj.Microrregiao.value_counts().to_frame(n)
             self.itens = self.obj.Item.value_counts().to_frame(n)
-            self.mc_por_ev = self.obj.groupby(['Microrregiao', 'Evento']).count()['Probabilidade'].to_frame(n)
+            self.mc_por_ev = self.obj.groupby(['Microrregiao', 'Evento']).count()['Quantidade'].to_frame(n)
 
             
             pass

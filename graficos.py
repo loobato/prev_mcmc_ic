@@ -2,6 +2,7 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
+from shower import Shower
 
 class Grafico():
     def __init__(self, real: list, previsao: list) -> None:
@@ -11,21 +12,46 @@ class Grafico():
         pass
     
     def evento(self, save=False):
-        vc_prev = self.previsao[0].Evento.sort_values()
-        vc_real = self.real[1].Evento.reset_index(drop=True).sort_values()
-        indices = vc_real.unique()
-        indices[0] = 'Chuvas\nIntensas'
-        vc_prev = vc_prev.replace(vc_prev.unique(), np.arange(7))
-        vc_real = vc_real.replace(vc_real.unique(), np.arange(7))
+        if isinstance(self.previsao, list):
+            vc_prev = self.previsao[0].Evento.sort_values()
+            vc_real = self.real[1].Evento.reset_index(drop=True).sort_values()
+            indices = vc_real.unique()
+            indices[0] = 'Chuvas\nIntensas'
+            vc_prev = vc_prev.replace(vc_prev.unique(), np.arange(7))
+            vc_real = vc_real.replace(vc_real.unique(), np.arange(7))
 
-        fig, ax = plt.subplots(1, 1, figsize=(9, 6))
-        hist = ax.hist([vc_prev.values, vc_real.values], 7, align='mid', label=['Previsto', 'Real'], density=True)
-        ax.legend()
-        plt.xticks([x + 0.4 for x in hist[1][:-1]], indices)
-        plt.ylabel('Freq.')
-        plt.title('Densidade de Eventos')
-        plt.gcf().autofmt_xdate()
-        plt.tight_layout()
+            fig, ax = plt.subplots(1, 1, figsize=(9, 6))
+            hist = ax.hist([vc_prev.values, vc_real.values], 7, align='mid', label=['Previsto', 'Real'], density=True)
+            ax.legend()
+            plt.xticks([x + 0.4 for x in hist[1][:-1]], indices)
+            plt.ylabel('Freq.')
+            plt.title('Densidade de Eventos')
+            plt.gcf().autofmt_xdate()
+            plt.tight_layout()
+
+        elif isinstance(self.previsao, pd.DataFrame):
+            show = Shower(self.previsao, 'rankings')
+            gp = self.previsao.groupby(['Evento', 'Microrregiao']).count()['Item']
+
+            Y = []
+            for evs in show.evento.index[:5]:
+                y = gp[evs]
+                y.name = f'{evs}'
+                Y.append(y)
+
+            color = plt.cm.rainbow(np.linspace(0, 1, len(Y)))
+            fig, ax = plt.subplots(1, 1, figsize=(12, 8))
+
+            for e, i in enumerate(Y):
+                ax.bar(i.index, i.values, label=i.name, edgecolor='black' , color=color[e])
+            
+            ax.set_yscale('linear')
+            plt.legend()
+            plt.gcf().autofmt_xdate()
+            plt.tight_layout()
+            plt.ylabel('Solicitações')
+            plt.title('Eventos por microrregião')
+
         if save: fig.savefig(self.path+'\eventos.png')
         
         return fig
@@ -168,58 +194,81 @@ class Grafico():
         return fig
 
     def itens(self, save=False):
-        grp_real = self.real[2].groupby(['Evento', 'Item']).count()['Microrregiao']
-        grp_prev = self.previsao[2].groupby(['Evento', 'Item']).count()['Microrregiao']
+        if isinstance(self.previsao, list):
+            grp_real = self.real[2].groupby(['Evento', 'Item']).count()['Microrregiao']
+            grp_prev = self.previsao[2].groupby(['Evento', 'Item']).count()['Microrregiao']
 
-        # formando densidades (series multindex)
-        serie_real = pd.Series(index=grp_real.index)
-        for ev, it in grp_real.index:
-            total = grp_real.loc[ev].sum()
-            count_mc = grp_real.loc[ev, it]
-            serie_real[(ev,it)] = count_mc / total
+            # formando densidades (series multindex)
+            serie_real = pd.Series(index=grp_real.index)
+            for ev, it in grp_real.index:
+                total = grp_real.loc[ev].sum()
+                count_mc = grp_real.loc[ev, it]
+                serie_real[(ev,it)] = count_mc / total
 
-        serie_prev = pd.Series(index=grp_prev.index)
-        for ev, it in grp_prev.index:
-            total = grp_prev.loc[ev].sum()
-            count_mc = grp_prev.loc[ev, it]
-            serie_prev[(ev,it)] = count_mc / total
+            serie_prev = pd.Series(index=grp_prev.index)
+            for ev, it in grp_prev.index:
+                total = grp_prev.loc[ev].sum()
+                count_mc = grp_prev.loc[ev, it]
+                serie_prev[(ev,it)] = count_mc / total
 
-        alt_ev = None
-        for ev, it in serie_real.index:
-            if ev == alt_ev:
-                pass
-            else:
-                fig, ax = plt.subplots(1, 1)
-                por_evento_real = serie_real.loc[ev]
-                por_evento_prev = serie_prev.loc[ev]
+            alt_ev = None
+            for ev, it in serie_real.index:
+                if ev == alt_ev:
+                    pass
+                else:
+                    fig, ax = plt.subplots(1, 1)
+                    por_evento_real = serie_real.loc[ev]
+                    por_evento_prev = serie_prev.loc[ev]
 
-                for idx in por_evento_real.index:
-                    try:
-                        por_evento_prev.loc[idx]
-                    except KeyError:
-                        por_evento_prev.loc[idx] = 0
+                    for idx in por_evento_real.index:
+                        try:
+                            por_evento_prev.loc[idx]
+                        except KeyError:
+                            por_evento_prev.loc[idx] = 0
 
-                for idx in por_evento_prev.index:
-                    try:
-                        por_evento_real.loc[idx]
-                    except KeyError:
-                        por_evento_real.loc[idx] = 0
+                    for idx in por_evento_prev.index:
+                        try:
+                            por_evento_real.loc[idx]
+                        except KeyError:
+                            por_evento_real.loc[idx] = 0
 
-                por_evento_real.sort_index(inplace=True)
-                por_evento_prev.sort_index(inplace=True)
+                    por_evento_real.sort_index(inplace=True)
+                    por_evento_prev.sort_index(inplace=True)
 
-                ax.barh(por_evento_real.index, por_evento_real.values, 0.4, label='Real')
-                ax.barh([x - 0.4 for x in np.arange(len(por_evento_real.index))], por_evento_prev.values, 0.4, label='Previsto')
-                ax.set_ylabel('Item')
-                ax.set_xlabel('Freq.')
-                plt.yticks([x-0.2 for x in np.arange(len(por_evento_real.index))])
-                plt.legend()
-                plt.title(f'{ev}')
-                plt.gcf().autofmt_xdate()
-                plt.tight_layout()
-                if save: fig.savefig(self.path+f'\item_{ev}.png')
-            
-            alt_ev = ev
+                    ax.barh(por_evento_real.index, por_evento_real.values, 0.4, label='Real')
+                    ax.barh([x - 0.4 for x in np.arange(len(por_evento_real.index))], por_evento_prev.values, 0.4, label='Previsto')
+                    ax.set_ylabel('Item')
+                    ax.set_xlabel('Freq.')
+                    plt.yticks([x-0.2 for x in np.arange(len(por_evento_real.index))])
+                    plt.legend()
+                    plt.title(f'{ev}')
+                    plt.gcf().autofmt_xdate()
+                    plt.tight_layout()
+                    if save: fig.savefig(self.path+f'\item_{ev}.png')
+                alt_ev = ev
+        elif isinstance(self.previsao, pd.DataFrame):
+            show = Shower(self.previsao, 'rankings')
+            gp = self.previsao.groupby(['Item', 'Microrregiao']).count()['Evento']
+
+            Y = []
+            for it in show.itens.index[:5]:
+                y = gp[it]
+                y.name = f'{it}'
+                Y.append(y)
+
+            color = plt.cm.rainbow(np.linspace(0, 1, len(Y)))
+            fig, ax = plt.subplots(1, 1, figsize=(12, 8))
+
+            for e, i in enumerate(Y):
+                ax.bar(i.index, i.values, label=i.name, edgecolor='black' , color=color[e])
+            ax.set_yscale('linear')
+            plt.legend()
+            plt.gcf().autofmt_xdate()
+            plt.tight_layout()
+            plt.ylabel('Solicitações')
+            plt.title('Itens solicitados por Microrregião')
         
         return fig
+    
+    
 #%%

@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import warnings
 from previsao import Previsao
+from mapas import Mapas
 
 warnings.filterwarnings('ignore')
 np.random.seed(49)
@@ -53,7 +54,18 @@ rank_c3 = c3.rankings
 rank_c3.evento
 c3.resultados()
 
-#%%
+#%% PREVISÕES FEITAS
+'''Essa parte aqui eu tive que fazer a mão, sem automatizar essas coisas na classe de 
+Previsao porque não tinha tempo e também porque meu PC desligou e perdi as previsões feitas,
+me restando apenas o xlsx que foi gerado.'''
+
+path = r'C:\Users\henri\OneDrive\Desktop\Cousas da Facu\Pesquisa\Excelzar'
+prev_c1 = pd.read_excel(path + '\prev_c1_final.xlsx')
+prev_c2 = pd.read_excel(path + '\prev_c2_final.xlsx')
+prev_c3 = pd.read_excel(path + '\prev_c3_final.xlsx')
+
+#%% Valores dos rankings
+
 cb_c1 = prev_c1[['Item', 'Valor Esperado']].groupby(['Item']).sum().sort_values("Valor Esperado", ascending=False)
 cb_c2 = prev_c2[['Item', 'Valor Esperado']].groupby(['Item']).sum().sort_values("Valor Esperado", ascending=False)
 cb_c3 = prev_c3[['Item', 'Valor Esperado']].groupby(['Item']).sum().sort_values("Valor Esperado", ascending=False)
@@ -69,3 +81,27 @@ cb_mc_c2 = prev_c2.groupby(['Item', 'Microrregiao']).sum()['Quantidade'].sort_va
 cb_mc_c3 = prev_c3.groupby(['Item', 'Microrregiao']).sum()['Quantidade'].sort_values(ascending=False).loc['Cesta básica 7d']
 
 cb_mc_c3
+
+#%% Criação de gráficos
+
+mapas_c1 = Mapas(prev_c1)
+mapas_c1.eventos().show()
+mapas_c1.microrregiao().show()
+mapas_c1.itens().show()
+#%%
+mapas_c2 = Mapas(prev_c2)
+mapas_c2.eventos().show()
+mapas_c2.microrregiao().show()
+mapas_c2.itens().show()
+#%%
+mapas_c3 = Mapas(prev_c3)
+mapas_c3.eventos().show()
+mapas_c3.microrregiao().show()
+mapas_c3.itens().show()
+# %% 
+from dados_mcmc import dados_drive
+
+mapa_orig = Mapas(dados_drive)
+mapa_orig.microrregiao()
+mapa_orig.eventos()
+mapa_orig.itens()
