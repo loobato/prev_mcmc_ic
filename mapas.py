@@ -148,16 +148,4 @@ class Mapas:
         fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0},
                           title="Teste")
         return fig
-#%%
-
-from dados_mcmc import dados_drive
-
-df = dados_drive
-df.Quantidade = df.Quantidade.fillna(0)
-df.Quantidade = df.Quantidade.astype('int64')
-df.Microrregiao.unique()
-#%%
-a = Mapas(df)
-a.eventos()
-
 # %%

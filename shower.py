@@ -1,5 +1,5 @@
 #%%
-import numpy as no
+import numpy as np
 import pandas as pd
 
 class Shower:
@@ -30,3 +30,4 @@ class Shower:
             
             pass
 
+ 

@@ -62,6 +62,10 @@ dados_drive2.columns = dados_drive1.columns
 #%% Ajuste de itens
 
 def replace_itens():
+    '''
+    ->  Organiza e padroniza os itens da base de dados cada um em suas peculiaridades.
+    '''
+
     global dados_drive, dados_drive2
     itens_finais = dados_drive2['Item'].unique()
 
@@ -140,8 +144,9 @@ def replace_itens():
 
 #%% Separar por ocorrencias
 def sep_microreg_data(df):
-    # Função para separar os dados por microregiao e data em MultIndex
-    
+    '''
+    ->  Função para separar os dados por microregiao e data em MultIndex
+    '''    
     arrays = [df['Microrregiao'], df['Data']]
     mult = pd.MultiIndex.from_arrays(arrays, names=['Microrregiao', 'Data'])
     df = df.drop(['Microrregiao', 'Data'], axis=1)
@@ -150,8 +155,9 @@ def sep_microreg_data(df):
     return df
 
 def eventos_unicos(df):
-    # Função para separar por microreg e data os eventos sem duplicatas
-
+    '''
+    ->  Função para separar por microreg e data os eventos sem duplicatas
+    '''
     if df.index.__class__.__name__ != 'MultiIndex':
         try:
             df = sep_microreg_data(df)
@@ -167,6 +173,7 @@ def eventos_unicos(df):
     DF = pd.DataFrame(DIS, index=df.index.unique())
         
     return DF 
+
 
 #%% Auxiliares
 

@@ -52,7 +52,6 @@ class Previsao():
 
         self.indexado, self.msm_qnts = gt.index_qnt(self.dados_gastos)
         
-
     def run(self):
         self.prev_eventos = ev.met_hast_sampler(self.mat_trans, 
                                                 self.vet_inicial, 

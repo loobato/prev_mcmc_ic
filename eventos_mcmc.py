@@ -16,9 +16,11 @@ warnings.filterwarnings('ignore')
 #%% Frequencias Microrregiao/Evento
 
 def probs_microreg_evento(atual):
-    # Função que gera uma série de multindex com as frequencias de cada evento
-    # por microregiao p/ uma alocação das microrregioes nos eventos previstos
-    
+    '''
+    Função que gera uma série de multindex com as frequencias de cada evento
+    por microregiao p/ uma alocação das microrregioes nos eventos previstos
+    '''
+
     m = atual.reset_index()
     if 'Data' in m.columns:
         m.drop(['Data'], axis=1, inplace=True)
@@ -44,6 +46,7 @@ def med_desv_eventos(dados_crus):
     from scipy.stats import norm
     ''' Função que tira a média e o desvio padrão dos eventos da série histórica
         e mapeia eles no dicionário map '''
+    
     df = dados_crus['Evento'].to_frame()
 
     # Criando um mapa de nomes para numeros
@@ -60,6 +63,9 @@ def med_desv_eventos(dados_crus):
 #%% Vetor Inicial
 
 def vetor_inicial(dds_unicos):
+    '''
+    ->  Gera a distribuição incial dos eventos da base de dados históricos
+    '''
     dds_unicos = dds_unicos['Evento'].to_frame()
     estados = dds_unicos.Evento.unique()
     obs = dds_unicos.value_counts()
@@ -76,8 +82,9 @@ def vetor_inicial(dds_unicos):
 #%% Probabilidade de Markov
 
 def prob_markov(n, V0, MT, trans=True):   
-    # Pn = V0 . MT^n
-
+    '''
+    Pn = V0 . MT^n
+    '''
     if trans:
         MT = np.transpose(MT)
     MTn = np.linalg.matrix_power(MT, n)
@@ -92,8 +99,10 @@ def prob_markov(n, V0, MT, trans=True):
 #%% Matriz de Transição
 
 def watchousky(df):
-    # Função de criação da matrix de transição para todo o conjunto
-    
+    '''
+    Função de criação da matrix de transição para todo o conjunto
+    '''
+
     # Lista de Eventos
     lis_ev = list(df.Evento.unique())
 
@@ -123,7 +132,10 @@ def watchousky(df):
 #%% Metropolis-Hasting Sampler
 
 def met_hast_sampler(matriz, vet_inicial, msm):
-    ''' Como descrito no livro 'Statistical Computing in R' '''
+    ''' 
+    -> Aplicação computacional do algoritmo descrito no livro 'Statistical Computing in R'
+    '''
+
     from scipy.stats import norm
     
     mu, std, map = msm
@@ -187,7 +199,9 @@ def met_hast_sampler(matriz, vet_inicial, msm):
 #%% Alocar Microregioes
 
 def prev_microreg(probs, mcmc):
-    # Função para alocar os eventos do MHS em microrregioes de acordo com suas frequencias
+    '''
+    Função para alocar os eventos do MHS em microrregioes de acordo com suas frequencias
+    '''
     lis_microreg = list()
     copy = mcmc.copy()
     
@@ -236,7 +250,10 @@ def norms_microreg(df):
     return dis_norm
 
 def aloc_microreg(norms, previsao):
-    # Gere amostras aleatórias a partir da distribuição normal
+    '''
+    ->  Gerar amostras aleatórias a partir da distribuição normal
+    '''
+    
     lis_microreg = []
     prev = previsao.copy()
     for ev in prev.Evento:
@@ -273,6 +290,7 @@ def aloc_microreg(norms, previsao):
 def apl_fator(df, fatores):
     '''Funcao para utilizar os fatores de alteração nas 
     vizualizações e assim mudar a media e desv dos eventos'''
+    
     df = df.Evento.copy().to_frame()
     vc = df.value_counts()
     lis = []
@@ -294,3 +312,4 @@ def apl_fator(df, fatores):
     return df
 
 # %%
+ 

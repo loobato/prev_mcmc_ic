@@ -49,6 +49,7 @@ def prob_item_evento(df, mapa=False):
 def prev_itens(dis, solic, ev):
     '''Função para criar uma lista categórica através de uma distribuição normal 
     das observações de itens em cada evento'''
+
     lis = list()
     mu, std, map = dis[ev]
     normal = norm(loc=mu, scale=std)
@@ -112,9 +113,10 @@ def prob_pedidos(dados_crus):
 
 def solicitacoes(prob_solic, prob_item, dis, prev):
     global precos
-    # Função para gerar o numero de solicitações de itens
-    # Ver qual é o evento gerado e criar uma certa quantia de solicitações pra ele
-
+    '''
+    Função para gerar o numero de solicitações de itens
+    Ver qual é o evento gerado e criar uma certa quantia de solicitações pra ele
+    '''
     qnt_solic = []
     itens_solic = []
     lis_precos = []
@@ -140,7 +142,12 @@ def solicitacoes(prob_solic, prob_item, dis, prev):
 #%% Df Indexado
 
 def index_qnt(dados):
-    
+    '''
+    ->  Pega o conj de dados e ajeita num df multindex pelos eventos e itens pedidos,
+        com uma coluna de quant de pedidos p/ gerar a normal das quantidades
+        solicitadas de itens naquele evento.
+    '''
+
     df = dados.copy()
     df = df.loc[:,['Microrregiao', 'Evento', 'Item', 'Quantidade']]
 

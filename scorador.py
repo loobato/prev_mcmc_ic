@@ -132,6 +132,6 @@ class Scorador:
         self.mostrador = Shower(df, 'erros')
 
         return self.mostrador
-
+ 
 #%% Gráficos
 
