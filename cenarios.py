@@ -1,6 +1,6 @@
 #%%
 import numpy as np
-import pandas as pd
+import pandas as pdG
 import warnings
 from previsao import Previsao
 from mapas import Mapas
@@ -82,23 +82,23 @@ cb_mc_c3 = prev_c3.groupby(['Item', 'Microrregiao']).sum()['Quantidade'].sort_va
 
 cb_mc_c3
 
-#%% Criação de gráficos
+#%% Criação de gráficos - C1
 
 mapas_c1 = Mapas(prev_c1)
 mapas_c1.eventos().show()
 mapas_c1.microrregiao().show()
 mapas_c1.itens().show()
-#%%
+#%% C2
 mapas_c2 = Mapas(prev_c2)
 mapas_c2.eventos().show()
 mapas_c2.microrregiao().show()
 mapas_c2.itens().show()
-#%%
+#%% C3
 mapas_c3 = Mapas(prev_c3)
 mapas_c3.eventos().show()
 mapas_c3.microrregiao().show()
 mapas_c3.itens().show()
-# %% 
+# %% SERIE HISTORICA
 from dados_mcmc import dados_drive
 
 mapa_orig = Mapas(dados_drive)
